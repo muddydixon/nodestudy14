@@ -1,0 +1,21 @@
+{
+  "name": "2014-08",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "coffee-script": "^1.7.1",
+    "commander": "^2.3.0",
+    "deferred": "^0.7.1",
+    "express": "^4.8.3",
+    "kue": "^0.8.5",
+    "redis-commander": "^0.2.1",
+    "request": "^2.40.0",
+    "uuid": "^1.4.1"
+  }
+}
