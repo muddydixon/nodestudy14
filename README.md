@@ -1,16 +1,33 @@
-Sample Kue Worker / Server
+東京Node学園 14時限目 2014/08/19 @DeNA
 ------------------------------------------------------------
 
-ベストプラクティスでは無いかもしれませんがとりあえず、こうやることで
-一定の規律を持って様々な処理をWorkerに登録し、対応しています。
+## 自己紹介
+
+* @muddydixon
+* github.com/muddydixon
+* @niftyのクラウド事業部だけど、クラウドとはあんまり関係ない仕事してる
+
+![muddydixon](./images/muddydixon.jpg)
+
+## Node.js で Queue を実現する kue の話
+
+### 今日話すこと
+
+* node.jsのqueueの話
+* ベストプラクティスでは無いかもしれませんがとりあえず、こうやることで一定の規律を持って様々な処理をWorkerに登録し、対応しています、という話
 
 ## kue とは
 
 > Kue is a priority job queue backed by redis, built for node.js.
-> 
-> Kue は redis をバックエンドとした Queue です
 
+Kue は redis をバックエンドとした Queue です
 
+### 特徴
+
+* Redisをバックエンドとしています
+* `type`を利用することで複数のWorkerを綺麗に扱うことができます
+* `REST API`の口を持っているので、ステータス取得やJobの処理をHTTPでやりとりできます
+* [Resque](http://resquework.org/)みたいにjob毎にcleanな環境を手に入れるようにも、(書けば)できる
 * jobs は singleton
 
 ```
@@ -23,17 +40,49 @@ exports.createQueue = function ( options ) {
 };
 ```
 
+* Webのクライアントがある
+
 ### 簡単な使い方紹介 (Readme.mdみれば書いてある)
 
+```
+kue = require "kue"
+
+jobs = kue.createQueue(redisSetting)
+
+# consumerの登録
+jobs.process("myevent", (job, done, ctx)->
+  console.log "start #{job.title}"
+  console.log job.data
+
+  # some processes
+
+  done(err, result)
+)
+
+# producer
+job = jobs.create("myevent", {
+  title: "my title" # これがWeb Clientで表示される
+  value: 1
+})
+```
+
+* ConsumerとProducerのやりとりはRedisを介して行うだけなので、ConsumerもProducerもRedisにあわせてスケールするのが扱い易い
 
 
 ### Web Client
+
+* これが推しっぽいけど、まあ、うん
+* 確かに便利
+* [redis-commander](http://joeferner.github.io/redis-commander/)と合わせて使うと便利
 
 ![kue web client](images/kue.webclient.png)
 
 ## 競合
 
+* 素のNodeプロセス立ち上げてHTTPで話をする
+	* POSTでデータを渡して、connectionはって、結果が終わるのを待ち受ける
 * [Bull](https://github.com/OptimalBits/bull)
+* [Resque](http://resquework.org/)
 
 ### Pros
 
@@ -44,8 +93,23 @@ exports.createQueue = function ( options ) {
 
 * (現状) Job の Expire を自動設定できない(Redis の保存形式に依存)
 
+## Job のステータス
+
+* inactive: 処理待ち状態
+* active: 処理中状態←ここがたまったりした
+* failed: 失敗した状態←ここは情報を見る
+* complete: 無事に完了した状態←ここがredisを圧迫する
+
 ## Redis の内部形式
 
+結構いっぱい書いてくる
+
+* \#{prefix}:\#{eventtype}:jobs
+* \#{prefix}:job:\#{jobId}
+	* \#{prefix}:job:\#{jobId}:log
+* \#{prefix}:jobs:\#{status}
+	* status: complete | failed | inactive
+* \#{prefix}:jobs:\#{eventtype}:\#{status}
 
 ## 辛かったこと
 
@@ -98,8 +162,8 @@ class MyWorker extends Worker
   process: (job)->
     # なんかしょり
     # さいごに Promise を返せばいい
-```    
-    
+```
+
 * class Worker
 
 ```
@@ -209,3 +273,14 @@ module.exports = class Worker
     )
     d.promise
 ```
+
+## 宣伝
+
+<iframe width="1000" height="400" src="http://mb.cloud.nifty.com/"></iframe>
+
+* お仕事！ノベルティ持ってきました！
+
+<iframe width="1000" height="400" src="http://ll.jus.or.jp/2014/program"></iframe>
+
+
+
