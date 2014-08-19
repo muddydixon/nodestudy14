@@ -47,10 +47,10 @@ module.exports = class Worker
     # console.error "Worker: define class extends this"
     sleep(2000)
     .then(->
-      if Math.random() < 0.
+      if Math.random() < 0.5
         throw new Error("random error")
       else
-        null
+        return job.data.title
     )
 
   #
@@ -79,8 +79,13 @@ module.exports = class Worker
       domain = Domain.create()
       domain.run =>
         @process(job)
-        .then((result)-> done(null, result))
-        .catch((err)-> console.log err; done(err))
+        .then((result)->
+          done(null, result)
+        )
+        .catch((err)->
+          console.log err
+          done(err)
+        )
         .finally(=>
           console.log "Worker(#{@id}): finish processing #{job.type}:#{job.data.title}"
           @current = null
@@ -88,7 +93,7 @@ module.exports = class Worker
 
       domain.on("error", (err)->
         @current = null
-        done(err)
+        done(err, job.data.title)
       )
     )
     @

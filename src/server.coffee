@@ -42,7 +42,7 @@ module.exports = class Server
     # completeした Job は基本見ないので Redis を圧迫するくらいなら削除
     # expireをかけるタイミングがない！(直接、kue.jobから登録すれば可能)
     @jobs.on "job complete", (id, result)=>
-      console.log result
+      console.log "result(#{id})", result
       @getJob(id)
       .then((job)=>
         d = deferred()
@@ -56,7 +56,14 @@ module.exports = class Server
 
     @jobs.on "job failed", (id)=>
       @getJob(id)
-      .catch((err)-> console.error "Server: #{err.message}")
+      .then((job)->
+        err = new Error(job._error)
+        console.log err.constructor.name
+        console.log "err (#{id})", err.message
+      )
+      .catch((err)->
+        console.error "Server: #{err.message}"
+      )
 
     return deferred(@) unless @options.port
 

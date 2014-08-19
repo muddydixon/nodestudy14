@@ -27,8 +27,8 @@ Kue は redis をバックエンドとした Queue です
 * Redisをバックエンドとしています
 * `type`を利用することで複数のWorkerを綺麗に扱うことができます
 * `REST API`の口を持っているので、ステータス取得やJobの処理をHTTPでやりとりできます
-* [Resque](http://resquework.org/)みたいにjob毎にcleanな環境を手に入れるようにも、(書けば)できる
-* jobs は singleton
+* [Resque](http://resquework.org/)みたいにjob毎にcleanな環境を手に入れるようにも、(書けば)できる(はず、今書いてる)
+* jobs は singleton(processでひとつ)
 
 ```
 exports.createQueue = function ( options ) {
@@ -276,11 +276,13 @@ module.exports = class Worker
 
 ## 宣伝
 
-<iframe width="1000" height="400" src="http://mb.cloud.nifty.com/"></iframe>
-
 * お仕事！ノベルティ持ってきました！
 
-<iframe width="1000" height="400" src="http://ll.jus.or.jp/2014/program"></iframe>
+![mBaaS](./images/mBaaS.png)
+
+* Nodeの人たちがたくさん出ます!
+
+<iframe width="1000" height="800" src="http://ll.jus.or.jp/2014/program"></iframe>
 
 
 
